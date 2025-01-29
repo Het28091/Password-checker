@@ -1,14 +1,19 @@
 import re
 import requests
 import hashlib
+import unicodedata
+import math
+import string
 
 class PsCheck:
     @staticmethod
     #Checks that password contains only allowed characters.
     def valid(password):
-        invalid_terms = [' ', '/', ':', ';', '<', '>', '%', '*', '?', '|']
+        invalid_terms = [' ', '/', ':', ';']
         for i in password:
             if i in invalid_terms:
+                return False
+            if unicodedata.category(i).startswith("So"):  # "So" = Symbol, Other (includes emojis)
                 return False
         return True
 
@@ -16,7 +21,7 @@ class PsCheck:
     # checks that password includes all necessary variations.
     def basic(password,c = 0):
         criteria = {
-            "Length(>=10)": len(password) >= 10,
+            "Length(10-128)": (10 <= len(password) >= 128),
             "Uppercase letter (A-Z)": bool(re.search(r'[A-Z]', password)),
             "Lowercase letter (a-z)": bool(re.search(r'[a-z]', password)),
             "Numbers (0-9)": bool(re.search(r'\d', password)),
@@ -29,11 +34,11 @@ class PsCheck:
                 feedback.append(key)
 
         # Print requirements
-        if c == 0:
+        if c == 0 and feedback:
+            print("Suggestions : --")
             for feed in feedback:
                 print(feed)
-
-        return len(feedback) == 0
+        return len(feedback) <= 2 and PsCheck.entropy_cal(password) >= 40
 
     @staticmethod
     def moderate(password):
@@ -59,3 +64,36 @@ class PsCheck:
 
         print("Password is not breached.\n")
         return True
+
+    @staticmethod
+    def entropy_cal(password):
+        # Define character sets
+        lower = "abcdefghijklmnopqrstuvwxyz"
+        upper = "ABCDEFGHIJKLMNOPQRSTUVWXYZ"
+        digits = "0123456789"
+        special = "!@#$%^&*()-_=+[]{}|;:'\",.<>?/`~"
+
+        # Combine all character sets
+        all_characters = lower + upper + digits + special
+
+        # Calculate the number of unique characters in the password
+        unique_characters = set(password)
+        N = len(unique_characters)  # Number of unique characters used in the password
+
+        # Calculate length of the password
+        L = len(password)
+
+        # Calculate entropy in bits
+        if L == 0 or N == 0:
+            return 0  # Return 0 for empty password or no unique characters
+
+        entropy_bits = L * math.log2(N)
+
+        # Calculate maximum possible entropy for a password of length L
+        max_entropy_bits = L * math.log2(len(all_characters))
+
+        # Calculate entropy as a percentage
+        entropy_percentage = (entropy_bits / max_entropy_bits) * 100
+
+        return round(entropy_percentage, 2)  # Return rounded percentage
+

@@ -1,14 +1,14 @@
 import os
 import tkinter as tk
 from tkinter import filedialog
-from Main import PsCheck
+from Core_functions import PsCheck
 psc = PsCheck()
 
 # Creating interface
 print("\nWelcome to Password Strength Checker !!\n")
 print("What would you like to do today")
 
-while(True):
+while True:
     print("1. Check if a password is safe to use.")
     print("2. Check a list of passwords from a file and classify them as weak, string and invalid.")
     print("3. Check if a password is breached.")
@@ -62,7 +62,7 @@ while(True):
 
         # File selected
         if fpath:
-            with open (fpath) as file:
+            with open (fpath,encoding="utf-8") as file:
                 weak,strong,invalid = [],[],[]
                 for psw in file.readlines():
                     psw = psw.strip()
@@ -76,19 +76,19 @@ while(True):
             # get parent directory
             rpath = os.path.dirname(fpath)
             # Creates file for Strong passwords
-            with open (rpath + "/strong_passwords.txt", 'w') as str:
+            with open (rpath + "/strong_passwords.txt", 'w',encoding="utf-8") as str:
                 for i in strong:
                     str.write(i)
             str.close()
 
             # Creates file for weak passwords
-            with open (rpath + "/weak_passwords.txt", 'w') as wk:
+            with open (rpath + "/weak_passwords.txt", 'w',encoding="utf-8") as wk:
                 for i in weak:
                     wk.write(i)
             wk.close()
 
             # Creates file for invalid passwords
-            with open (rpath + "/invalid_passwords.txt", 'w') as iv:
+            with open (rpath + "/invalid_passwords.txt", 'w',encoding="utf-8") as iv:
                 for i in invalid:
                     iv.write(i)
             iv.close()
