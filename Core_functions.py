@@ -3,7 +3,6 @@ import requests
 import hashlib
 import unicodedata
 import math
-import string
 
 class PsCheck:
     @staticmethod
